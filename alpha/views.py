@@ -8,3 +8,7 @@ from . models import land
 class landing(ListView):
     model = land
     template_name = 'alpha/landing.html'
+
+class commu(ListView):
+    model = land
+    template_name = 'alpha/commu.html'

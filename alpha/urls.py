@@ -18,4 +18,5 @@ from . import views
 
 urlpatterns = [
     path('', views.landing.as_view()),
+    path('commu/', views.commu.as_view()),
 ]
