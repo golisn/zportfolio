@@ -19,4 +19,6 @@ from . import views
 urlpatterns = [
     path('', views.landing.as_view()),
     path('commu/', views.commu.as_view()),
+    path('codingtest/', views.codingtest.as_view()),
+    path('codingexam/', views.codingexam.as_view()),
 ]

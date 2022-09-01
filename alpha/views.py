@@ -12,3 +12,11 @@ class landing(ListView):
 class commu(ListView):
     model = land
     template_name = 'alpha/commu.html'
+
+class codingtest(ListView):
+    model = land
+    template_name = 'alpha/codingtest.html'
+
+class codingexam(ListView):
+    model = land
+    template_name = 'alpha/codingexam.html'
