@@ -1,0 +1,16 @@
+{% extends 'alpha/base.html' %}
+
+{% block title %}Coding result{% endblock %}
+
+{% block main_area %}
+
+<div>
+    {{ content }}
+    {% if content %}
+
+    <div>{{ content }}</div>
+
+    {% endif %}
+</div>
+
+{% endblock %}

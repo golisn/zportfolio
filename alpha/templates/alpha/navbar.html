@@ -1,42 +1,66 @@
-<nav class="navbar navbar-expand-lg bg-light">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/">Big_Jj</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="/">Home</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Python</a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="/codingexam/">문제풀기</a></li>
-                        <li><a class="dropdown-item" href="/codingtest/">코딩연습</a></li>
+{% load socialaccount %}
+<header class="blog-header lh-1 py-3">
+    <div class="nav-scroller py-1 mb-2">
+        <nav class="navbar navbar-expand-lg bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">ezpycoding</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Python</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/codingexam/">문제풀기</a></li>
+                                <li><a class="dropdown-item" href="/codingtest/">코딩연습</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">게시판</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">질문&답변</a></li>
+                                <li><a class="dropdown-item" href="#">정보/팁</a></li>
+                                <li><a class="dropdown-item" href="/commu/">자유게시판</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#">베스트 정보/팁</a></li>
+                            </ul>
+                        </li>
                     </ul>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">게시판</a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">질문&답변</a></li>
-                        <li><a class="dropdown-item" href="#">정보/팁</a></li>
-                        <li><a class="dropdown-item" href="/commu/">자유게시판</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">베스트 정보/팁</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item dropdown">
-                    {% comment %} {% if %}
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">user</a>
-                    {% endif %} {% endcomment %}
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">user</a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">mypage</a></li>
-                        <li><a class="dropdown-item" href="#">logout</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown" style='list-style:none;'>
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ user.username }}</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">mypage</a></li>
+                            <li><a class="dropdown-item" href="/accounts/logout/">log out</a></li>
+                        </ul>
+                    </li>
+                </div>
+                {% else %}
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                login
+                </button>
+                <!-- Modal -->
+                <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">login</h5>
+                        </div>
+                        <div class="modal-body">
+                            </i><a role="button" class="btn btn-primary" href="{% provider_login_url 'google' %}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-google" viewBox="0 0 16 16">
+                                    <path d="M15.545 6.558a9.42 9.42 0 0 1 .139 1.626c0 2.434-.87 4.492-2.384 5.885h.002C11.978 15.292 10.158 16 8 16A8 8 0 1 1 8 0a7.689 7.689 0 0 1 5.352 2.082l-2.284 2.284A4.347 4.347 0 0 0 8 3.166c-2.087 0-3.86 1.408-4.492 3.304a4.792 4.792 0 0 0 0 3.063h.003c.635 1.893 2.405 3.301 4.492 3.301 1.078 0 2.004-.276 2.722-.764h-.003a3.702 3.702 0 0 0 1.599-2.431H8v-3.08h7.545z"/>
+                                </svg>&nbsp google login</a>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                {% endif %}
+                </div>
+            </div>
+        </nav>
     </div>
-</nav>
+</header>

@@ -21,4 +21,5 @@ urlpatterns = [
     path('commu/', views.commu.as_view()),
     path('codingtest/', views.codingtest.as_view()),
     path('codingexam/', views.codingexam.as_view()),
+    path('result/', views.result.as_view()),
 ]

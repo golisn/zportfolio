@@ -13,14 +13,17 @@
 
 </head>
 <body>
-    {% include 'alpha/navbar.html' %}
-
+    <main class="container">
+        <div class="container px-0">
+            {% include 'alpha/navbar.html' %}
+        </div>
     {% block main_area %}
     {% endblock %}
 
     {% block side_area %}
     {% endblock %}
-
+    </main>
     {% include 'alpha/footer.html' %}
+    
 </body>
 </html>

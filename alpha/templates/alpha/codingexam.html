@@ -1,20 +1,41 @@
 {% extends 'alpha/base.html' %}
 
-{% block title %}Coding Exam{% endblock %}
+{% block title %}Coding Example{% endblock %}
 
-{% block main_area %}
-<div class='col-lg-12 p-3'>
-    <div class='mb-3 col-lg-12 col-sm-12 text-lg-start'>
-        <select class="form-select" aria-label="codingexamlevel">
-            <option selected>초보자 문제 난이도 선택</option>
-            <option value="1">쉬움</option>
-            <option value="2">보통</option>
-            <option value="3">어려움</option>
-        </select>
-    </div>
-    <div class='col-lg-12 col-sm-12 text-end'>
-        <button class='btn btn-dark float-right' for='codingexamlevel'>선택</button>
-    </div>
-</div>
+    {% block main_area %}
 
-{% endblock %}
+
+    <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <button class="nav-link active" id="nav-module-tab" data-bs-toggle="tab" data-bs-target="#nav-module" type="button" role="tab" aria-controls="nav-module" aria-selected="true">모듈 1</button>
+            <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">2</button>
+            <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">3</button>
+        </div>
+    </nav>
+    <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane fade show active" id="nav-module" role="tabpanel" aria-labelledby="nav-module-tab" tabindex="0">
+            <div class="d-flex align-items-start">
+                <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                    <button class="nav-link active" id="v-pills-module-tab" data-bs-toggle="pill" data-bs-target="#v-pills-module" type="button" role="tab" aria-controls="v-pills-module" aria-selected="true">기본 자료형 4</button>
+                    <button class="nav-link" id="v-pills-profile-tab" data-bs-toggle="pill" data-bs-target="#v-pills-profile" type="button" role="tab" aria-controls="v-pills-profile" aria-selected="false">제어문 5</button>
+                    <button class="nav-link" id="v-pills-messages-tab" data-bs-toggle="pill" data-bs-target="#v-pills-messages" type="button" role="tab" aria-controls="v-pills-messages" aria-selected="false">6</button>
+                    <button class="nav-link" id="v-pills-settings-tab" data-bs-toggle="pill" data-bs-target="#v-pills-settings" type="button" role="tab" aria-controls="v-pills-settings" aria-selected="false">7</button>
+                </div>
+                <div class="tab-content" id="v-pills-tabContent">
+                    <div class="tab-pane fade show active" id="v-pills-module" role="tabpanel" aria-labelledby="v-pills-module-tab" tabindex="0">
+                        <div class="row">
+                            <div class="">
+                                <div class="list-group" id="list-tab" role="tablist">
+                                <a class="list-group-item list-group-item-action active" id="list-module-list" data-bs-toggle="list" href="#list-module" role="tab" aria-controls="list-module">리스트 (list) 8</a>
+                                <a class="list-group-item list-group-item-action" id="list-profile-list" data-bs-toggle="list" href="#list-profile" role="tab" aria-controls="list-profile">튜플 (tuple) 9</a>
+                                <a class="list-group-item list-group-item-action" id="list-messages-list" data-bs-toggle="list" href="#list-messages" role="tab" aria-controls="list-messages">딕션너리 (dictionary) 10</a>
+                                <a class="list-group-item list-group-item-action" id="list-settings-list" data-bs-toggle="list" href="#list-settings" role="tab" aria-controls="list-settings">집합 (set) 11</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endblock %}
