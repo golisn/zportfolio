@@ -1,0 +1,23 @@
+{% extends 'alpha/base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Commu Create{% endblock %}
+
+{% block main_area %}
+
+<div class='col-lg-12 p-3'>
+    <form method='POST'>{% csrf_token %}
+        <div class="mb-3 col-lg-12 col-sm-12 text-lg-start">
+            {{ form | crispy}}
+        </div>
+        <div class='col-lg-12 col-sm-12 text-end'>
+            <button class='btn btn-dark' for='codingtestarea'>검사</button>
+        </div>
+    </form> 
+</div>
+
+<div>
+    {{ form.media }}
+</div>
+
+
+{% endblock %}
