@@ -3,27 +3,84 @@
 {% block title %}Community{% endblock %}
 
 {% block main_area %}
+<span class="col">
+    {% if user.is_authenticated %}
+        {% if user.is_superuser or user.is_staff %}
+        <div class="d-grid justify-content-end">
+            <a class='btn btn-info btn-sm' href='/commucreate/' role='button'>New commu</a>
+        </div>
+        {% endif %}
+    {% endif %}
+</span>
 
+<h1 class='text-light'>
+    {% if search_info %}
+    <small class='text-muted'>{{ search_info }}</small>
+    {% endif %}
+    {% if category %}
+    <span class='badge badge-secondary'>{{ category }}
+        {% if category == '미분류' %}
+        ({{ no_category_post_count }})
+        {% else %}
+        ({{ category.post_set.count }})
+        {% endif %}
+    </sapn>
+    {% endif %}
+    {% if tag %}
+        <span class='badge badge-light'><i class='fas fa-tags'></i>{{ tag }} ({{ tag.post_set.count }})</sapn>
+    {% endif %}
+</h1>
 
-<div class="card">
-    <a href='/commucreate/' class='btn'><h5 class="card-header">제목링크</h5></a>
-    <div class="card-body">
-        <p class="card-text">게시글 내용.</p><span class="card-text">작성자:</span><span class="card-text">&nbsp&nbsp&nbsp&nbsp작성시간:</span>
+<div class="card container">
+    {% for p in object_list %}
+    <div class='row col-12'>
+        {% if  p.head_image %}
+            <img class='card_img_top' src='{{ p.head_image.url}}' alt='Card image cap'>
+        {% else %}
+            <span></span>
+        {% endif %}
+        
+            <a href='{{p.get_absolute_url}}' class='btn col card-header h5'>
+            {{p.title}}
+            </a>
+        
+            <a href='{{p.get_absolute_url}}' class='btn col-6 border-start border-end border-bottom'>
+                {{ p.get_content_markdown | truncatechars_html:50 | safe }}
+            </a>
+        <div class='col border-end border-bottom'>
+            <span class='h6'>작성자: {{p.author}}</span><span class="h6 small"><br/>작성시간: {{ p.create_at }}</span>
+        </div>
     </div>
+    {% endfor %}
 </div>
 
+<!-- pagination -->
+<br/>
+{% if is_paginated %}
+<ul class="pagination justify-content-center mb-4">
+{% if page_obj.has_next %}
+<li class="page-item">
+    <a class="page-link" href="?page={{ page_obj.next_page_number }}">&laquo;</a>
+</li>
+{% else %}    
+<li class="page-item disabled">
+<a class="page-link" href="#" aria-label="Previous">
+    <span aria-hidden="true">&laquo;</span>
+</a>
+</li>
+{% endif %}
+{% if page_obj.has_previous %}
+<li class="page-item">
+    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">&raquo;</a>
+</li>
+{% else %}    
+<li class="page-item disabled">
+<a class="page-link" href="#" aria-label="Previous">
+    <span aria-hidden="true">&raquo;</span>
+</a>
+</li>
+{% endif %}
+</ul>
+{% endif %}
 
-<div class='mt-2'>
-        <ul class="pagination justify-content-center">
-            <li class="page-item">
-                <a class="page-link" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
-            </li>
-            <li class="page-item"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item">
-                <a class="page-link" href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
-            </li>
-        </ul>
-</div>
 {% endblock %}

@@ -4,67 +4,62 @@
 
 {% block main_area %}
 
-  <div class="jumbotron jumbotron-fluid col-lg-12 py-2">
-    {% if user.is_authenticated and user == post.author %}
-  <a class='btn btn-info btn-sm float-right col-2' href='/alpha/update_post/{{ post.pk }}/' role='button'<i class='fas fa-pen'></i> Edit post</a>
-      {% endif %}
-    <div class="container">
-      <div class='card mb-4 col'>
+  <div class="p-2">
+    <div class="container p-2">
+      <div class='card'>
         {% if  post.head_image %}
         <img class='card_img_top' src='{{ post.head_image.url}}' alt='Card image cap'>
         {% else %}
-        <img class='card_img_top' src='https://picsum.photos/seed/{{p.id}}/800/200' alt='Random image cap'>
         {% endif %}
         <div id='post-area'>
+        <h1 class="m-0 px-2">{{ post.title }}</h3>
+        
+      </div>
+      <span class='px-2 small text-end'>작성자 : <a href='#'>{{post.author}}</a></span>
+      <span class='px-2 text-muted small text-end'>{{post.create_at}}<br/></span>
+        
+      {% if post.file_upload %}
+      <a href='{{post.file_upload.url}}' class='btn btn-outline-dark btn-sm col-4' role='button' download>
+        Download:
+        {% if post.get_file_ext == 'csv' %}
+        <i class="fa-solid fa-file-csv"></i>
+        {% elif post.get_file_ext == 'xlsx' or post.get_file_ext == 'xls' %}
+        <i class="fa-solid fa-file-excel"></i>
+        {% elif post.get_file_ext == 'pdf' %}
+        <i class="fa-solid fa-file-pdf"></i>
+        {% elif post.get_file_ext == 'word' %}
+        <i class="fa-solid fa-file-word"></i>
+        {% else %}
+        <i class="fa-solid fa-file"></i>
+        {% endif %}
+        {{ post.get_file_name}}
+      </a>
+      {% endif %}
+      <hr/ class='mt-0 mb-1'>
+      <h4 class='px-2'>{{ post.get_content_markdown | safe }}</h4>
+      {% if post.tags.exists %}
+      <div class='col px-0'>
         {% if post.category %}
         <span class='badge badge-secondary float-right'>{{ post.category }}</span>
         {% else %}
         <span class='badge badge-secondary float-right'>미분류</span>
         {% endif %}
-        <h1 class="display-4">{{ post.title }}</h1>
-      </div>
-        
-        <h5 class='text-muted'>{{ post.hook_text }}</h5>
-        <h4 class="lead">{{ post.get_content_markdown | safe }}</h4>
-
-        {% if post.tags.exists %}
-        <div class='col px-0'>
         <i class="fa-solid fa-tag"></i>
         {% for tag in post.tags.all %}
-            <a href='{{ tag.get_absolute_url }}'><span class='badge badge-pill badge-light'>{{ tag }}</sapn></a>
+          <a href='{{ tag.get_absolute_url }}'><span class='badge badge-pill badge-light'>{{ tag }}</sapn></a>
         {% endfor %}
-        </div>
-      {% endif %}
-
-
-        {% if post.file_upload %}
-        <a href='{{post.file_upload.url}}' class='btn btn-outline-dark btn-sm col-4' role='button' download>
-          Download:
-
-          {% if post.get_file_ext == 'csv' %}
-          <i class="fa-solid fa-file-csv"></i>
-          {% elif post.get_file_ext == 'xlsx' or post.get_file_ext == 'xls' %}
-          <i class="fa-solid fa-file-excel"></i>
-          {% elif post.get_file_ext == 'pdf' %}
-          <i class="fa-solid fa-file-pdf"></i>
-          {% elif post.get_file_ext == 'word' %}
-          <i class="fa-solid fa-file-word"></i>
-          {% else %}
-          <i class="fa-solid fa-file"></i>
-          {% endif %}
-          {{ post.get_file_name}}
-        </a>
-        {% endif %}
-        <hr class="my-2">
-        <p class="text-muted">{{post.create_at}}</p>
-        <a href='#'>{{post.author}}</a>
       </div>
+      {% endif %}
     </div>
+    {% if user.is_authenticated and user == post.author %}
+    <div class="d-grid justify-content-end">
+    <a class='btn btn-info btn-sm mt-1' href='/update_post/{{ post.pk }}/' role='button'<i class='fas fa-pen'></i> Edit post</a>
+    </div>
+    {% endif %}
   </div>
   <!-- Comments form-->
   <div id='comment-area'>
-    <div class='card my-4'>
-      <h5 class='card-header'>Leave a Comment:</h5>
+    <div class='card m-2'>
       <div class='card-body'>
         {% if user.is_authenticated %}
         <form id='comment-form' method='POST' action='{{ post.get_absolute_url }}new_comment/'>
@@ -72,7 +67,9 @@
           <div class='form-group'>
             {{comment_form | crispy }}
           </div>
-          <button type='submit' class='btn btn-primary'>Submit</button>
+          <div class="d-grid justify-content-end">
+            <button type='submit' class='btn btn-info btn-sm mt-1'>Submit</button>
+          </div>
         </form>
         {% else %}
         <a role='button' class='btn btn-outline-dark btn-block btn-sm' href='#' data-toggle='modal' data-target='#loginModal'>Log in and leave a comment</a>
@@ -81,7 +78,7 @@
     </div>
   {% if post.comment_set.exists %}
     {% for comment in post.comment_set.iterator %}
-    <div class='media mb-4' id='comment-{{ comment.pk }}'>
+    <div class='media m-3' id='comment-{{ comment.pk }}'>
       <img class='d-flex mr-3 rounded-circle' src='{{ comment.get_avatar_url }}' alt='{{ comment.author }}' width='60px'>
       <div class='media-body'>
         {% if user.is_authenticated and comment.author == user %}
@@ -89,7 +86,7 @@
           <a role='button'
             class='btn btn-sm btn-info'
             id='comment-{{ comment.pk }}-update-btn'
-            href='/alpha/update_comment/{{ comment.pk }}/'>
+            href='/update_comment/{{ comment.pk }}/'>
               edit
           </a>
           <a role='button'

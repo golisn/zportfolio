@@ -135,7 +135,7 @@ def tag_page(request, slug):
 class CommuCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView ):
     model = Post
     template_name = 'alpha/commucreate.html'
-    fields = ['title', 'hook_text', 'content', 'head_image', 'file_upload', 'category']
+    fields = ['title', 'content', 'head_image', 'file_upload', 'category']
     
     def test_func(self):
         return self.request.user.is_superuser or self.request.user.is_staff
@@ -169,7 +169,7 @@ class CommuCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView ):
 
 class CommuUpdate(LoginRequiredMixin, UpdateView, PermissionDenied):    
     model = Post
-    fields = ['title', 'hook_text', 'content', 'head_image', 'file_upload', 'category']
+    fields = ['title', 'content', 'head_image', 'file_upload', 'category']
     template_name = 'alpha/commucreate.html'
     
     def get_context_data(self, **kwargs):
@@ -271,7 +271,7 @@ class Commu(ListView):
     model = Post
     ordering = '-pk'
     template_name = 'alpha/commu.html'
-    paginate_by = 5
+    paginate_by = 10
 
     def get_context_data(self, **kwargs):
         context = super(Commu, self).get_context_data()

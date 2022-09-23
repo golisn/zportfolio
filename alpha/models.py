@@ -33,7 +33,7 @@ class Category(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return f'/alpha/category/{self.slug}/'
+        return f'/category/{self.slug}/'
     
 
     class Meta():
@@ -48,16 +48,15 @@ class Tag(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return f'/alpha/tag/{self.slug}/'
+        return f'/tag/{self.slug}/'
 
 
 
 class Post(models.Model):
     title = models.CharField(max_length=20)
-    hook_text = models.CharField(max_length=100, blank=True)
     content = models.TextField()
 
-    create_at = models.DateTimeField(auto_now_add=True)
+    create_at = models.DateTimeField(auto_now_add=True,)
     update_at = models.DateTimeField(auto_now=True)
 
     head_image = models.ImageField(upload_to='alpha/imges/%Y/%m/%d/', blank = True)
@@ -76,7 +75,7 @@ class Post(models.Model):
         return f'({self.pk}){self.title} :: {self.author}'
 
     def get_absolute_url(self):
-        return f'/alpha/{self.pk}/'
+        return f'/{self.pk}/'
 
     def get_file_name(self):
         return os.path.basename(self.file_upload.name)
