@@ -1,3 +1,4 @@
+
 from django.shortcuts import render, redirect, get_object_or_404
 
 # Create your views here.
@@ -7,69 +8,23 @@ from django.core.exceptions import PermissionDenied
 from django.utils.text import slugify
 from .forms import CommentForm
 from django.db.models import Q
-
-from . models import land, Post, Category, Tag, Comment
+import os
+import re
+from . models import Post_info, Post_qa, land, Post, Category, Tag, Comment
 import traceback
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+import time
+from selenium.webdriver.chrome.options import Options
 
 # Create your views here.
 from .models import Post, Category, Tag, Comment
 
-# class landing(ListView):
-#     model = land
-#     template_name = 'alpha/landing.html'
-
-class codingexam(ListView):
-    model = land
-    template_name = 'alpha/codingexam.html'
-
-class result(ListView):
-    model = land
-    template_name = 'alpha/result.html'
-
-    def get_a_b(self, **kwargs):
-        cotx = self.request.POST['content']
-        return cotx
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["content"] = self.get_a_b()
-        return context
-    # def form_valid(self, form):
-    #     response = super(codingtest, self).form_valid(form)
-    #     return response
-        
-
-    # def get_pytest(self, **kwargs):
-    #     testen = self.request.POST.get('content',None)
-    #     try:
-    #         return testen
-    #     except Exception:
-    #         err = traceback.format_exc()
-    #         return err
-
-    # def get_context_data(self, **kwargs):
-    #     context = super(result, self).get_context_data()
-    #     context['pytest'] = self.get_pytest()
-    #     return context
-class codingtest(CreateView):
+class Codingtest(CreateView):
     model = land
     template_name = 'alpha/codingtest.html'
     fields = ['content']
-
-    def form_valid(self, form):
-        return super().form_valid(form)
-
-    # def get_a_b(self, **kwargs):
-    #     cotx = self.request.GET.get('content')
-    #     return cotx
-
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     context["content"] = self.get_a_b()
-    #     return context
-
-#==================landing페이지 및 디테일 페이지
-
 
 class Landing(ListView):
     model = Post
@@ -81,6 +36,9 @@ class Landing(ListView):
         context = super(Landing, self).get_context_data()
         context['categories'] = Category.objects.all()
         context['no_category_post_count'] = Post.objects.filter(category=None).count()
+        context['qa_object_list'] = Post_qa.objects.all()
+        context['info_object_list'] = Post_info.objects.all()
+
         return context
 
 
@@ -246,26 +204,6 @@ def delete_comment(request, pk):
         raise PermissionDenied
 
 
-class PostSearch(Landing):
-    paginate_by = None
-
-    def get_queryset(self):
-        q = self.kwargs['q']
-        post_list = Post.objects.filter(
-            Q(title__contains=q) | Q(tags__name__contains=q)
-        ).distinct()
-        return post_list
-    
-    def get_context_data(self, **kwargs):
-        context = super(PostSearch, self).get_context_data()
-        q = self.kwargs['q']
-        context["search_info"] = f'Search: {q} ({self.get_queryset().count()})'
-
-        return context
-
-
-
-
 #===========================commu 페이지 리스트
 class Commu(ListView):
     model = Post
@@ -277,4 +215,307 @@ class Commu(ListView):
         context = super(Commu, self).get_context_data()
         context['categories'] = Category.objects.all()
         context['no_category_post_count'] = Post.objects.filter(category=None).count()
+
         return context
+
+#===========================commu_qa 페이지 리스트
+class Commu_qa(ListView):
+    model = Post_qa
+    ordering = '-pk'
+    template_name = 'alpha/commu_qa.html'
+    paginate_by = 10
+    context_object_name = 'qa_object_list'
+    def get_context_data(self, **kwargs):
+        context = super(Commu_qa, self).get_context_data()
+        context['categories'] = Category.objects.all()
+        context['no_category_post_count'] = Post.objects.filter(category=None).count()
+        
+        return context
+
+class CommuCreate_qa(LoginRequiredMixin, UserPassesTestMixin, CreateView ):
+    model = Post_qa
+    template_name = 'alpha/commucreate.html'
+    fields = ['title', 'content', 'head_image', 'file_upload', 'category']
+    
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.is_staff
+
+    def form_valid(self, form):
+        current_user = self.request.user
+        if current_user.is_authenticated and (current_user.is_staff or current_user.is_superuser):
+            form.instance.author = current_user
+            response = super(CommuCreate_qa, self).form_valid(form)
+
+            tags_str = self.request.POST.get('tags_str')
+
+            if tags_str:
+                tags_str = tags_str.strip()
+                tags_str = tags_str.replace(',',';')
+                tags_list = tags_str.split(';')
+
+                for t in tags_list:
+                    t = t.strip()
+                    tag, is_tag_created = Tag.objects.get_or_create(name=t)
+                    if is_tag_created:
+                        tag.slug = slugify(t, allow_unicode=True)
+                        tag.save()
+                    self.object.tags.add(tag)
+            
+            return response
+
+        else:
+            return redirect('/')
+
+
+class CommuUpdate_qa(LoginRequiredMixin, UpdateView, PermissionDenied):    
+    model = Post_qa
+    fields = ['title', 'content', 'head_image', 'file_upload', 'category']
+    template_name = 'alpha/commucreate.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super(CommuUpdate_qa, self).get_context_data()
+        if self.object.tags.exists():
+            tags_str_list = list()
+            for t in self.object.tags.all():
+                tags_str_list.append(t.name)
+            context['tags_str_default'] = '; '.join(tags_str_list)
+        return context
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and request.user == self.get_object().author:
+            return super(CommuUpdate_qa, self).dispatch(request, *args, **kwargs)
+        else:
+            raise PermissionDenied
+    def form_valid(self, form):
+        response = super(CommuUpdate_qa, self).form_valid(form)
+        self.object.tags.clear()
+
+        tags_str = self.request.POST.get('tags_str')
+        if tags_str:
+            tags_str = tags_str.strip()
+            tags_str = tags_str.replace(',',';')
+            tags_list = tags_str.split(';')
+
+            for t in tags_list:
+                t = t.strip()
+                tag, is_tag_created = Tag.objects.get_or_create(name=t)
+                if is_tag_created:
+                    tag.slug = slugify(t, allow_unicode=True)
+                    tag.save()
+                self.object.tags.add(tag)
+        
+        return response
+
+
+def new_comment_qa(request, pk):
+    if request.user.is_authenticated:
+        post = get_object_or_404(Post_qa, pk=pk)
+
+        if request.method == 'POST':
+            comment_form = CommentForm(request.POST)
+            if comment_form.is_valid():
+                comment = comment_form.save(commit=False)
+                comment.post = post
+                comment.author = request.user
+                comment.save()
+                return redirect(comment.get_absolute_url())
+            else:
+                return redirect(post.get_absolute_url())
+        else:
+            raise PermissionDenied
+
+#===========================commu_info 페이지 리스트
+class Commu_info(ListView):
+    model = Post_info
+    ordering = '-pk'
+    template_name = 'alpha/commu_info.html'
+    paginate_by = 10
+    context_object_name = 'info_object_list'
+
+    def get_context_data(self, **kwargs):
+        context = super(Commu_info, self).get_context_data()
+        context['categories'] = Category.objects.all()
+        context['no_category_post_count'] = Post.objects.filter(category=None).count()
+        return context
+
+class CommuCreate_info(LoginRequiredMixin, UserPassesTestMixin, CreateView ):
+    model = Post_info
+    template_name = 'alpha/commucreate.html'
+    fields = ['title', 'content', 'head_image', 'file_upload', 'category']
+    
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.is_staff
+
+    def form_valid(self, form):
+        current_user = self.request.user
+        if current_user.is_authenticated and (current_user.is_staff or current_user.is_superuser):
+            form.instance.author = current_user
+            response = super(CommuCreate_info, self).form_valid(form)
+
+            tags_str = self.request.POST.get('tags_str')
+
+            if tags_str:
+                tags_str = tags_str.strip()
+                tags_str = tags_str.replace(',',';')
+                tags_list = tags_str.split(';')
+
+                for t in tags_list:
+                    t = t.strip()
+                    tag, is_tag_created = Tag.objects.get_or_create(name=t)
+                    if is_tag_created:
+                        tag.slug = slugify(t, allow_unicode=True)
+                        tag.save()
+                    self.object.tags.add(tag)
+            
+            return response
+
+        else:
+            return redirect('/')
+
+
+class CommuUpdate_info(LoginRequiredMixin, UpdateView, PermissionDenied):    
+    model = Post_info
+    fields = ['title', 'content', 'head_image', 'file_upload', 'category']
+    template_name = 'alpha/commucreate.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super(CommuUpdate_info, self).get_context_data()
+        if self.object.tags.exists():
+            tags_str_list = list()
+            for t in self.object.tags.all():
+                tags_str_list.append(t.name)
+            context['tags_str_default'] = '; '.join(tags_str_list)
+        return context
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and request.user == self.get_object().author:
+            return super(CommuUpdate_info, self).dispatch(request, *args, **kwargs)
+        else:
+            raise PermissionDenied
+    def form_valid(self, form):
+        response = super(CommuUpdate_info, self).form_valid(form)
+        self.object.tags.clear()
+
+        tags_str = self.request.POST.get('tags_str')
+        if tags_str:
+            tags_str = tags_str.strip()
+            tags_str = tags_str.replace(',',';')
+            tags_list = tags_str.split(';')
+
+            for t in tags_list:
+                t = t.strip()
+                tag, is_tag_created = Tag.objects.get_or_create(name=t)
+                if is_tag_created:
+                    tag.slug = slugify(t, allow_unicode=True)
+                    tag.save()
+                self.object.tags.add(tag)
+        
+        return response
+
+
+def new_comment_info(request, pk):
+    if request.user.is_authenticated:
+        post = get_object_or_404(Post_info, pk=pk)
+
+        if request.method == 'POST':
+            comment_form = CommentForm(request.POST)
+            if comment_form.is_valid():
+                comment = comment_form.save(commit=False)
+                comment.post = post
+                comment.author = request.user
+                comment.save()
+                return redirect(comment.get_absolute_url())
+            else:
+                return redirect(post.get_absolute_url())
+        else:
+            raise PermissionDenied
+
+
+# ================================================ coding test
+
+import re
+
+def coresult(request):
+    cotest = request.POST.get('cote')
+
+    with open('ipynb/test.ipynb', 'w')as f:
+        f.write(f'''
+{{
+ "cells": [
+  {{
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "69481cd9",
+   "metadata": {{}},
+   "outputs": [],
+   "source": ["{cotest}"]
+  }}
+ ],
+ "metadata": {{
+  "kernelspec": {{
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  }},
+  "language_info": {{
+   "codemirror_mode": {{
+    "name": "ipython",
+    "version": 3
+   }},
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.13"
+  }},
+  "toc": {{
+   "base_numbering": 1,
+   "nav_menu": {{}},
+   "number_sections": true,
+   "sideBar": true,
+   "skip_h1_title": false,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": false,
+   "toc_position": {{}},
+   "toc_section_display": true,
+   "toc_window_display": false
+  }}
+ }},
+ "nbformat": 4,
+ "nbformat_minor": 5
+}}''')
+    #============= 저장한 주피터노트북 파일 실행===============#
+    
+    options = Options()
+    options.add_argument('headless')
+    path = r"tool/chromedriver.exe"
+    driver = webdriver.Chrome(path,options=options)
+    
+    driver.get("http://localhost:8888/notebooks/ipynb/test.ipynb")
+    tdoit = driver.find_element(By.XPATH,'//*[@id="password_input"]')
+    tdoit.send_keys('490c4f9f8d604aa643e7a017fa9c70191fb629080aa76625')
+    tdoit.send_keys(Keys.ENTER)
+    time.sleep(0.5)
+    driver.find_element(By.XPATH,"//*[@id='celllink']").click()
+    time.sleep(0.5)
+    driver.find_element(By.XPATH, '//*[@id="run_cell"]/a/span[1]').click()
+    time.sleep(0.5)
+    driver.find_element(By.XPATH, '//*[@id="save-notbook"]/button').click()
+    time.sleep(0.5)
+    with open('ipynb/test.ipynb', 'r', encoding='utf-8') as f:
+        test = f.read()
+
+    dodo = re.findall(r'"outputs": .*? "source',test,re.DOTALL)
+
+    result = []
+    for i,_ in enumerate(dodo):
+        result.append(dodo[i][:-6])
+    driver.quit()
+    return render(
+        request, 'alpha/codingresult.html',
+        {
+            "result" : result[0],
+        }
+    )

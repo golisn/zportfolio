@@ -22,9 +22,8 @@ class land(models.Model):
         return f'/codingtest/'
 
     def __str__(self):
-        return self.content
+        return self.content[:3]
 
-# Create your models here.
 class Category(models.Model):
     name = models.CharField(max_length=50, unique=True)
     slug = models.SlugField(max_length=200, unique=True, allow_unicode=True)
@@ -49,7 +48,6 @@ class Tag(models.Model):
 
     def get_absolute_url(self):
         return f'/tag/{self.slug}/'
-
 
 
 class Post(models.Model):
@@ -85,10 +83,117 @@ class Post(models.Model):
     
     def get_content_markdown(self):
         return markdown(self.content)
-    
+
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    create_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'{self.author}::{self.content}'
+
+    def get_absolute_url(self):
+        return f'{self.post.get_absolute_url()}#comment-{self.pk}'
+    
+    def get_avatar_url(self):
+        if self.author.socialaccount_set.exists():
+            return self.author.socialaccount_set.first().get_avatar_url()
+        else:
+            return f'https://doitdjango.com/avatar/id/1246/c44b46630a3ec9b7/svg/{self.author.id}'
+
+
+class Post_qa(models.Model):
+    title = models.CharField(max_length=20)
+    content = models.TextField()
+
+    create_at = models.DateTimeField(auto_now_add=True,)
+    update_at = models.DateTimeField(auto_now=True)
+
+    head_image = models.ImageField(upload_to='alpha/imges/%Y/%m/%d/', blank = True)
+    file_upload = models.FileField(upload_to='alpha/files/%Y/%m/%d/', blank = True)
+
+    # author = models.ForeignKey(User, on_delete=models.CASCADE) 작성자를 지우면 포스트 지우는 코딩
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)  # 작성자를 지워도 포스트는 남는 코딩
+
+    category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL, blank=True)
+
+    tags = models.ManyToManyField(Tag, blank=True)
+
+    content = MarkdownxField()
+
+    def __str__(self):
+        return f'({self.pk}){self.title} :: {self.author}'
+
+    def get_absolute_url(self):
+        return f'/{self.pk}/'
+
+    def get_file_name(self):
+        return os.path.basename(self.file_upload.name)
+
+    def get_file_ext(self):
+        return self.get_file_name().split('.')[-1]
+    
+    def get_content_markdown(self):
+        return markdown(self.content)
+
+class Comment_qa(models.Model):
+    post = models.ForeignKey(Post_qa, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    create_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'{self.author}::{self.content}'
+
+    def get_absolute_url(self):
+        return f'{self.post.get_absolute_url()}#comment-{self.pk}'
+    
+    def get_avatar_url(self):
+        if self.author.socialaccount_set.exists():
+            return self.author.socialaccount_set.first().get_avatar_url()
+        else:
+            return f'https://doitdjango.com/avatar/id/1246/c44b46630a3ec9b7/svg/{self.author.id}'
+
+class Post_info(models.Model):
+    title = models.CharField(max_length=20)
+    content = models.TextField()
+
+    create_at = models.DateTimeField(auto_now_add=True,)
+    update_at = models.DateTimeField(auto_now=True)
+
+    head_image = models.ImageField(upload_to='alpha/imges/%Y/%m/%d/', blank = True)
+    file_upload = models.FileField(upload_to='alpha/files/%Y/%m/%d/', blank = True)
+
+    # author = models.ForeignKey(User, on_delete=models.CASCADE) 작성자를 지우면 포스트 지우는 코딩
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)  # 작성자를 지워도 포스트는 남는 코딩
+
+    category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL, blank=True)
+
+    tags = models.ManyToManyField(Tag, blank=True)
+
+    content = MarkdownxField()
+
+    def __str__(self):
+        return f'({self.pk}){self.title} :: {self.author}'
+
+    def get_absolute_url(self):
+        return f'/{self.pk}/'
+
+    def get_file_name(self):
+        return os.path.basename(self.file_upload.name)
+
+    def get_file_ext(self):
+        return self.get_file_name().split('.')[-1]
+    
+    def get_content_markdown(self):
+        return markdown(self.content)
+
+class Comment_info(models.Model):
+    post = models.ForeignKey(Post_info, on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
     create_at = models.DateTimeField(auto_now_add=True)

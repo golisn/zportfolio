@@ -1,17 +1,25 @@
 {% extends 'alpha/base.html' %}
 
-{% block title %}Community{% endblock %}
+{% block title %}ezcoding-자유게시판{% endblock %}
 
 {% block main_area %}
 <span class="col">
     {% if user.is_authenticated %}
         {% if user.is_superuser or user.is_staff %}
         <div class="d-grid justify-content-end">
-            <a class='btn btn-info btn-sm' href='/commucreate/' role='button'>New commu</a>
+            <a class='btn btn-info btn-sm mb-1' href='/commucreate/' role='button'>새글</a>
         </div>
         {% endif %}
+    {% else %}
+    <div class='text-end'>
+        <span class='small meted'>새글(로그인 필요)</span>
+    </div>
     {% endif %}
 </span>
+<div class='border text-center'>
+    자유게시판
+</div>
+
 
 <h1 class='text-light'>
     {% if search_info %}
@@ -33,7 +41,7 @@
 
 <div class="card container">
     {% for p in object_list %}
-    <div class='row col-12'>
+    <div class='row col'>
         {% if  p.head_image %}
             <img class='card_img_top' src='{{ p.head_image.url}}' alt='Card image cap'>
         {% else %}
